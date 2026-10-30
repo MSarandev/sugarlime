@@ -1,0 +1,28 @@
+sugarlime
+Copyright (c) 2026 Exovoid Ltd.
+
+This product includes software developed as part of the sugarlime project,
+licensed under the MIT License. See LICENSE.
+
+Third-party material
+--------------------
+
+settings_values.md is the Claude Code settings reference, published by Anthropic
+as part of the Claude Code documentation at https://code.claude.com/docs. It is
+vendored here, unmodified, as the input to cmd/gen-schema, which generates
+internal/schema/registry_gen.go from it. It is Anthropic's documentation and is
+not covered by this project's MIT license; it remains subject to Anthropic's own
+terms. internal/schema/registry_gen.go is generated from it and carries the same
+provenance.
+
+This project is not affiliated with or endorsed by Anthropic.
+
+Go dependencies
+---------------
+
+  github.com/charmbracelet/bubbletea  — MIT
+  github.com/charmbracelet/bubbles    — MIT
+  github.com/charmbracelet/lipgloss   — MIT
+
+and their transitive dependencies; see go.mod and the module cache for the full
+set and their license texts.

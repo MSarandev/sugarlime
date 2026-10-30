@@ -1,0 +1,64 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  pull_request:
+    paths:
+      - .goreleaser.yaml
+      - .github/workflows/release.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  # A release is only as good as the tests that gate it.
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Test
+        run: go test -race ./...
+
+      - name: Check the generated schema is current
+        run: |
+          go run ./cmd/gen-schema
+          git diff --exit-code internal/schema/registry_gen.go
+
+  release:
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # GoReleaser needs the tags for the changelog
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Release
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          version: "~> v2"
+          # On a pull request, build everything but publish nothing.
+          args: >-
+            ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+            && 'release --clean'
+            || 'release --snapshot --clean' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Keep the built artifacts for a dry run
+        if: github.event_name != 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/*.tar.gz
+          retention-days: 7

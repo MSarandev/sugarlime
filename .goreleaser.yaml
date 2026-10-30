@@ -1,0 +1,106 @@
+# GoReleaser builds, packages and publishes a release when a v* tag is pushed.
+# Try it without publishing: make snapshot
+version: 2
+
+project_name: sugarlime
+
+before:
+  hooks:
+    - go mod download
+
+builds:
+  - id: sugarlime
+    main: ./cmd/sugarlime
+    binary: sugarlime
+    env:
+      - CGO_ENABLED=0 # a static binary, so one artifact per platform is enough
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X main.version={{ .Version }}
+      - -X main.commit={{ .ShortCommit }}
+      - -X main.date={{ .CommitDate }}
+    mod_timestamp: "{{ .CommitTimestamp }}" # reproducible builds
+
+archives:
+  - id: sugarlime
+    formats: [tar.gz]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - README.md
+      - CHANGELOG.md
+      - LICENSE
+      - NOTICE
+
+checksum:
+  name_template: checksums.txt
+
+# Linux packages, for people who would rather their package manager owned it.
+nfpms:
+  - id: packages
+    package_name: sugarlime
+    vendor: Exovoid
+    homepage: https://github.com/MSarandev/sugarlime
+    maintainer: Exovoid
+    description: A terminal UI for Claude Code's settings.json.
+    license: MIT
+    formats:
+      - deb
+      - rpm
+      - apk
+    contents:
+      - src: LICENSE
+        dst: /usr/share/doc/sugarlime/LICENSE
+      - src: NOTICE
+        dst: /usr/share/doc/sugarlime/NOTICE
+      - src: README.md
+        dst: /usr/share/doc/sugarlime/README.md
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-dev"
+
+changelog:
+  use: github
+  sort: asc
+  groups:
+    - title: Added
+      regexp: '^.*?feat(\(.+\))??!?:.+$'
+      order: 0
+    - title: Fixed
+      regexp: '^.*?fix(\(.+\))??!?:.+$'
+      order: 1
+    - title: Other
+      order: 99
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+      - "^ci:"
+      - "^style:"
+      - Merge pull request
+      - Merge branch
+
+release:
+  draft: false
+  prerelease: auto # a tag like v1.0.0-rc1 publishes as a pre-release
+  footer: |
+    ## Install
+
+    With Go:
+
+    ```sh
+    go install github.com/MSarandev/sugarlime/cmd/sugarlime@{{ .Tag }}
+    ```
+
+    Or download the archive for your platform below and put `sugarlime` on your
+    `PATH`. Verify it against `checksums.txt`:
+
+    ```sh
+    sha256sum --check checksums.txt --ignore-missing
+    ```
