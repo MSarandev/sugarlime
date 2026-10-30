@@ -1,5 +1,10 @@
 # sugarlime
 
+[![Test](https://github.com/MSarandev/sugarlime/actions/workflows/test.yml/badge.svg)](https://github.com/MSarandev/sugarlime/actions/workflows/test.yml)
+[![Coverage](https://img.shields.io/badge/coverage-92.0%25-brightgreen)](#development)
+[![Go Report Card](https://goreportcard.com/badge/github.com/MSarandev/sugarlime)](https://goreportcard.com/report/github.com/MSarandev/sugarlime)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
 A terminal UI for Claude Code's `settings.json`.
 
 Claude Code reads a lot of settings — 247 keys at the time of writing, spread
@@ -8,55 +13,14 @@ undiscoverable unless you keep the reference open in a browser tab. sugarlime
 finds those files, shows every key with its documentation next to its value, and
 writes your changes back without touching anything else in the file.
 
-```
- ___ _   _  ___   _   ___ _    ___ __  __ ___
-/ __| | | |/ __| /_\ | _ \ |  |_ _|  \/  | __|
-\__ \ |_| | (_ |/ _ \|   / |__ | || |\/| | _|
-|___/\___/ \___/_/ \_\_|_\____|___|_|  |_|___|
-                               by Exovoid Ltd.
+It opens on the settings files it found, so you always know which one you are
+about to change:
 
-Which settings file do you want to edit?
+![The sugarlime file picker: each settings file it found with its path and key count, then options to add a file by path, scan a directory, or look again](docs/screens/file-picker.png)
 
-› user              ~/.claude/settings.json                       12 keys
-  claude-work       ~/.claude-work/settings.json                   4 keys
-  claude-personal   ~/.claude-personal/settings.json               7 keys
-  project           ./.claude/settings.json                 not created yet
-  global config     ~/.claude.json                                 3 keys
+Pick one, and every key is a keystroke away with the reference beside it:
 
-  + Add a settings file by path               a
-  + Scan a directory for settings files       s
-  + Look again in the usual places            r
-
-↑↓ move · enter open · a add · s scan · r rescan · ? help · q exit
-```
-
-Pick a file, and you land in the editor:
-
-```
- ___ _   _  ___   _   ___ _    ___ __  __ ___
-/ __| | | |/ __| /_\ | _ \ |  |_ _|  \/  | __|    editing  user
-\__ \ |_| | (_ |/ _ \|   / |__ | || |\/| | _|     ~/.claude/settings.json
-|___/\___/ \___/_/ \_\_|_\____|___|_|  |_|___|    ● unsaved   c switches file
-                               by Exovoid Ltd.
-
- Overview  Models  Permissions  Sandbox  MCP  Hooks  Plugins  Interface  More
-  allow ▸                              2 items  │ permissions.defaultMode
-  ask ▸                                not set  │
-  deny ▸                                1 item  │ Set the permission mode new
-  additionalDirectories ▸              not set  │ sessions start in. When you
-› defaultMode                      acceptEdits  │ leave it unset, sessions start
-  disableBypassPermissionsMode         not set  │ in the built-in default for
-  useAutoModeDuringPlan                not set  │ your surface.
-                                               │
-                                               │ In this file: "acceptEdits"
-                                               │
-                                               │ Accepts: string, one of:
-                                               │   default:
-                                               │     runs only reads without
-                                               │     asking
- ↑↓ move · enter open · space toggle · x unset · / filter · f find · q exit
-```
-
+![The Models tab: the left pane lists each key and its value, the right pane explains what advisorModel does, what this file sets it to, the aliases it accepts, and its default](docs/screens/browsing.png)
 
 ## Why
 
@@ -185,6 +149,11 @@ Each key gets the editor its type calls for, taken from the reference:
 | anything more complex | a JSON editor with a starting template and parse checking |
 
 An empty value in a text or number field unsets the key, as does `x` anywhere.
+
+Pickers carry the reference's own notes on each accepted value, so you are
+choosing between explanations rather than guessing at strings:
+
+![A value picker for allowManagedMcpServersOnly, offering true, false and not set, with a note that Claude Code uses false when the key is unset](docs/screens/value-picker.png)
 
 ## Which files it edits
 

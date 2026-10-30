@@ -29,6 +29,14 @@ make lint   # golangci-lint run, if you have it
 CI runs the same checks on macOS and Linux, with `-race`, and fails if the
 checked-in registry does not match `settings_values.md`.
 
+It also fails if coverage drops below 85%, or if the coverage badge in the
+README claims more than the suite actually measures. `make cover` prints the
+number; if your change moves it, update the badge in `README.md` to match:
+
+```markdown
+[![Coverage](https://img.shields.io/badge/coverage-92.0%25-brightgreen)](#development)
+```
+
 ## Claude Code added a setting
 
 Do not edit `internal/schema/registry_gen.go`. Replace `settings_values.md` with

@@ -1,3 +1,6 @@
 /sugarlime
 /coverage.out
 /dist/
+
+# macOS directory metadata
+.DS_Store

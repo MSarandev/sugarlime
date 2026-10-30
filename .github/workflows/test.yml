@@ -33,5 +33,10 @@ jobs:
           go run ./cmd/gen-schema
           git diff --exit-code internal/schema/registry_gen.go
 
-      - name: Report coverage
-        run: go tool cover -func=coverage.out | tail -1
+      - name: Check coverage, and that the README badge is honest
+        run: |
+          actual=$(go tool cover -func=coverage.out | awk '/^total:/ {print substr($3, 1, length($3) - 1)}')
+          badge=$(grep -o 'coverage-[0-9.]*%25' README.md | head -1 | sed 's/coverage-//; s/%25//')
+          echo "measured ${actual}%, README badge ${badge}%"
+          awk -v a="$actual" 'BEGIN { if (a < 85) { print "::error::coverage " a "% is below the 85% floor"; exit 1 } }'
+          awk -v a="$actual" -v b="$badge" 'BEGIN { if (b > a + 0.5) { print "::error::the README badge claims " b "%, but coverage is " a "%"; exit 1 } }' 
