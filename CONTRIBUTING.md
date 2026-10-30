@@ -34,7 +34,7 @@ README claims more than the suite actually measures. `make cover` prints the
 number; if your change moves it, update the badge in `README.md` to match:
 
 ```markdown
-[![Coverage](https://img.shields.io/badge/coverage-92.0%25-brightgreen)](#development)
+[![Coverage](https://img.shields.io/badge/coverage-91.9%25-brightgreen)](#development)
 ```
 
 ## Claude Code added a setting
