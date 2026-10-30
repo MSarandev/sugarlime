@@ -10,7 +10,7 @@ the host's libc. So a release is just "build four binaries and publish them".
 ## Cutting a release
 
 ```sh
-# 1. make sure main is green and the changelog is honest
+# 1. make sure the branch is green and the changelog is honest
 make test
 $EDITOR CHANGELOG.md     # move Unreleased into a version heading
 
@@ -18,7 +18,27 @@ git commit -am "Release v0.1.0"
 
 # 2. tag and push
 git tag -a v0.1.0 -m "v0.1.0"
-git push origin main v0.1.0
+git push origin master v0.1.0
+```
+
+### The `v` prefix is not optional
+
+The tag must be `v1.0.0`, not `1.0.0`. Two things depend on it:
+
+- **The release workflow** triggers on `v*`. A tag without the prefix pushes
+  silently and builds nothing.
+- **Go modules** only recognise `vX.Y.Z` as a version. Without the prefix,
+  `go install …@v1.0.0` fails and `@latest` falls back to a pseudo-version off
+  the default branch, so people get whatever is on `master` rather than the
+  release you tagged.
+
+To correct a tag that is already pushed:
+
+```sh
+git tag -d 1.0.0
+git push origin :refs/tags/1.0.0
+git tag -a v1.0.0 -m "v1.0.0"
+git push origin v1.0.0
 ```
 
 The workflow then runs the test suite, checks the generated registry is current,

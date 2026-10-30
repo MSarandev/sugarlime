@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"runtime/debug"
+	"strings"
 
 	"github.com/MSarandev/sugarlime/internal/config"
 	"github.com/MSarandev/sugarlime/internal/ui"
@@ -20,14 +22,70 @@ var (
 	date    = ""
 )
 
+// buildInfo is what the Go toolchain stamps into a binary by itself, which is
+// all there is to go on when it was installed with `go install` rather than
+// built by the release pipeline.
+type buildInfo struct {
+	version  string
+	revision string
+	time     string
+	modified bool
+}
+
+func currentBuildInfo() buildInfo {
+	var bi buildInfo
+	info, ok := debug.ReadBuildInfo()
+	if !ok {
+		return bi
+	}
+	if v := info.Main.Version; v != "" && v != "(devel)" {
+		bi.version = v
+	}
+	for _, s := range info.Settings {
+		switch s.Key {
+		case "vcs.revision":
+			bi.revision = s.Value
+		case "vcs.time":
+			bi.time = s.Value
+		case "vcs.modified":
+			bi.modified = s.Value == "true"
+		}
+	}
+	return bi
+}
+
 // versionLine describes this build in one line.
 func versionLine() string {
-	out := "sugarlime " + version
-	switch {
-	case commit != "" && date != "":
-		out += " (" + commit + ", " + date + ")"
-	case commit != "":
-		out += " (" + commit + ")"
+	return formatVersion(version, commit, date, currentBuildInfo())
+}
+
+func formatVersion(v, c, d string, bi buildInfo) string {
+	if v == "dev" && bi.version != "" {
+		// Module versions carry a v prefix; the release pipeline's do not.
+		// Drop it so both report the same string.
+		v = strings.TrimPrefix(bi.version, "v")
+	}
+	if c == "" && len(bi.revision) >= 7 {
+		c = bi.revision[:7]
+	}
+	if d == "" {
+		d = bi.time
+	}
+
+	var detail []string
+	if c != "" {
+		detail = append(detail, c)
+	}
+	if d != "" {
+		detail = append(detail, d)
+	}
+	if bi.modified {
+		detail = append(detail, "modified")
+	}
+
+	out := "sugarlime " + v
+	if len(detail) > 0 {
+		out += " (" + strings.Join(detail, ", ") + ")"
 	}
 	return out
 }

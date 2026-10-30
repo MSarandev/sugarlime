@@ -39,4 +39,6 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Release pipeline: a `v*` tag builds static binaries for macOS and Linux on
   arm64 and x86-64, plus `.deb`, `.rpm` and `.apk` packages and checksums, and
   publishes them as a GitHub Release.
-- `-version` reports the build's version, commit and date.
+- `-version` reports the build's version, commit and date, falling back to the
+  revision the Go toolchain stamps in when the binary was not built by the
+  release pipeline.

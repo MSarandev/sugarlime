@@ -187,3 +187,75 @@ func TestPrintContextsWithNone(t *testing.T) {
 		t.Errorf("got %q", out.String())
 	}
 }
+
+func TestFormatVersion(t *testing.T) {
+	cases := []struct {
+		name    string
+		v, c, d string
+		bi      buildInfo
+		want    string
+	}{
+		{
+			name: "release build, stamped with ldflags",
+			v:    "1.0.0", c: "abc1234", d: "2026-10-30",
+			want: "sugarlime 1.0.0 (abc1234, 2026-10-30)",
+		},
+		{
+			name: "go install of a tagged version",
+			v:    "dev",
+			bi:   buildInfo{version: "v1.0.0"},
+			want: "sugarlime 1.0.0",
+		},
+		{
+			name: "go install off an untagged branch",
+			v:    "dev",
+			bi:   buildInfo{version: "v0.0.0-20261030164757-0228ddde93c2"},
+			want: "sugarlime 0.0.0-20261030164757-0228ddde93c2",
+		},
+		{
+			name: "go build in a clean checkout",
+			v:    "dev",
+			bi:   buildInfo{revision: "0228ddde93c285ca", time: "2026-10-30T16:47:57Z"},
+			want: "sugarlime dev (0228ddd, 2026-10-30T16:47:57Z)",
+		},
+		{
+			name: "go build with uncommitted changes",
+			v:    "dev",
+			bi:   buildInfo{revision: "0228ddde93c285ca", modified: true},
+			want: "sugarlime dev (0228ddd, modified)",
+		},
+		{
+			name: "nothing known at all",
+			v:    "dev",
+			want: "sugarlime dev",
+		},
+		{
+			name: "ldflags win over the stamped module version",
+			v:    "1.2.3", c: "deadbee",
+			bi:   buildInfo{version: "v0.0.0-pseudo", revision: "ffffffffff"},
+			want: "sugarlime 1.2.3 (deadbee)",
+		},
+		{
+			name: "a revision too short to shorten is left out",
+			v:    "dev",
+			bi:   buildInfo{revision: "abc"},
+			want: "sugarlime dev",
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			if got := formatVersion(c.v, c.c, c.d, c.bi); got != c.want {
+				t.Errorf("got %q, want %q", got, c.want)
+			}
+		})
+	}
+}
+
+func TestCurrentBuildInfoDoesNotPanic(t *testing.T) {
+	// Under `go test` the binary carries build info, so this exercises the
+	// real reader rather than a fake.
+	bi := currentBuildInfo()
+	if bi.revision != "" && len(bi.revision) < 7 {
+		t.Errorf("unexpected revision %q", bi.revision)
+	}
+}

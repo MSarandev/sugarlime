@@ -1,7 +1,7 @@
 # sugarlime
 
 [![Test](https://github.com/MSarandev/sugarlime/actions/workflows/test.yml/badge.svg)](https://github.com/MSarandev/sugarlime/actions/workflows/test.yml)
-[![Coverage](https://img.shields.io/badge/coverage-92.0%25-brightgreen)](#development)
+[![Coverage](https://img.shields.io/badge/coverage-91.9%25-brightgreen)](#development)
 [![Go Report Card](https://goreportcard.com/badge/github.com/MSarandev/sugarlime)](https://goreportcard.com/report/github.com/MSarandev/sugarlime)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
@@ -84,11 +84,34 @@ Needs Go 1.27 or later.
 go install github.com/MSarandev/sugarlime/cmd/sugarlime@latest
 ```
 
+`go install` puts the binary in `$(go env GOPATH)/bin` — usually `~/go/bin` —
+and never in the directory you ran it from. That directory has to be on your
+`PATH` for `sugarlime` to work as a command:
+
+```sh
+echo 'export PATH="$PATH:$(go env GOPATH)/bin"' >> ~/.zshrc
+exec $SHELL
+```
+
+Or install straight into a directory that is already on your `PATH`, and skip
+the shell config:
+
+```sh
+GOBIN=/usr/local/bin go install github.com/MSarandev/sugarlime/cmd/sugarlime@latest
+```
+
+To check where it went, and that it runs:
+
+```sh
+ls "$(go env GOPATH)/bin/sugarlime"
+"$(go env GOPATH)/bin/sugarlime" -version
+```
+
 ### From source
 
 ```sh
-make install          # into $(go env GOPATH)/bin
 make build            # ./sugarlime in the working directory
+make install          # into $(go env GOPATH)/bin, same PATH note as above
 ```
 
 It is one static binary with no runtime dependencies — the settings registry and
