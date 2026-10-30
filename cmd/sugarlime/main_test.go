@@ -201,10 +201,16 @@ func TestFormatVersion(t *testing.T) {
 			want: "sugarlime 1.0.0 (abc1234, 2026-10-30)",
 		},
 		{
-			name: "go install, where only the module version is known",
+			name: "go install of a tagged version",
+			v:    "dev",
+			bi:   buildInfo{version: "v1.0.0"},
+			want: "sugarlime 1.0.0",
+		},
+		{
+			name: "go install off an untagged branch",
 			v:    "dev",
 			bi:   buildInfo{version: "v0.0.0-20261030164757-0228ddde93c2"},
-			want: "sugarlime v0.0.0-20261030164757-0228ddde93c2",
+			want: "sugarlime 0.0.0-20261030164757-0228ddde93c2",
 		},
 		{
 			name: "go build in a clean checkout",

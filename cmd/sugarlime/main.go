@@ -61,7 +61,9 @@ func versionLine() string {
 
 func formatVersion(v, c, d string, bi buildInfo) string {
 	if v == "dev" && bi.version != "" {
-		v = bi.version
+		// Module versions carry a v prefix; the release pipeline's do not.
+		// Drop it so both report the same string.
+		v = strings.TrimPrefix(bi.version, "v")
 	}
 	if c == "" && len(bi.revision) >= 7 {
 		c = bi.revision[:7]
